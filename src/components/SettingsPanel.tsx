@@ -93,8 +93,9 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                   <ExternalLink size={11} />
                 </a>
 
-                <Label>모델</Label>
+                <Label>Model</Label>
                 <input
+                  id="modelName"
                   value={connection.model}
                   onChange={(e) => setModel(e.target.value)}
                   placeholder="예: openai/gpt-5"
@@ -102,6 +103,11 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                   style={{ background: "var(--bg-inset)", border: "1px solid var(--border)", color: "var(--text)" }}
                 />
                 <div className="flex flex-wrap gap-1.5">
+                  {/* TODO this is the way to go. */}
+                  {/* first get the api and get free models.
+                  first addition: get list of them and make them as easy buttons here
+                  2. make them as a small search compoent + with table
+                  3. make the table include bunch of information in a small list. */}
                   {SUGGESTED_MODELS.map((m) => (
                     <button
                       key={m.id}
