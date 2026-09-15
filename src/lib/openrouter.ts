@@ -201,12 +201,3 @@ export async function getFreeModels(): Promise<ModelOption[]> {
   const options = mapToOptions(json);
   return [...new Map(options.map(o => [o.id, o])).values()];
 }
-
-/** A short curated list shown as quick-pick suggestions in Settings. */
-export const SUGGESTED_MODELS: { id: string; label: string }[] = [
-  { id: "openai/gpt-5", label: "GPT-5" },
-  { id: "anthropic/claude-sonnet-4.5", label: "Claude Sonnet 4.5" },
-  { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-  { id: "deepseek/deepseek-chat", label: "DeepSeek Chat" },
-  { id: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B" },
-];

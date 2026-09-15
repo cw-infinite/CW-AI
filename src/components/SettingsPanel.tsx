@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff, Monitor, Sun, Moon, Trash2, ExternalLink } from "lucide-react";
 import { useSettingsStore, ACCENT_PRESETS } from "../store/useSettingsStore";
 import { useChatStore } from "../store/useChatStore";
-import { getFreeModels, ModelOption, SUGGESTED_MODELS } from "../lib/openrouter";
+import { getFreeModels, ModelOption } from "../lib/openrouter";
 import type { ThemeMode } from "../types";
 
 interface SettingsPanelProps {
