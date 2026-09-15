@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff, Monitor, Sun, Moon, Trash2, ExternalLink } from "lucide-react";
 import { useSettingsStore, ACCENT_PRESETS } from "../store/useSettingsStore";
 import { useChatStore } from "../store/useChatStore";
-import { SUGGESTED_MODELS } from "../lib/openrouter";
+import { getFreeModels, ModelOption, SUGGESTED_MODELS } from "../lib/openrouter";
 import type { ThemeMode } from "../types";
 
 interface SettingsPanelProps {
@@ -22,6 +22,15 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const clearAllChats = useChatStore((s) => s.clearAllChats);
   const [showKey, setShowKey] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [freeModels, setData] = useState<ModelOption[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const models = await getFreeModels();
+      setData(models);
+    }
+    fetchData();
+  }, []);
 
   return (
     <AnimatePresence>
@@ -108,7 +117,7 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                   first addition: get list of them and make them as easy buttons here
                   2. make them as a small search compoent + with table
                   3. make the table include bunch of information in a small list. */}
-                  {SUGGESTED_MODELS.map((m) => (
+                  {freeModels.map((m:any) => (
                     <button
                       key={m.id}
                       onClick={() => setModel(m.id)}

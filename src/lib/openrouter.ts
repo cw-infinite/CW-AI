@@ -140,6 +140,68 @@ function extractErrorMessage(err: unknown): string {
   return "OpenRouter 요청 중 알 수 없는 오류가 발생했습니다.";
 }
 
+
+
+export type ModelOption = {
+  id: `${string}:free`;
+  label: string;
+};
+
+type OpenRouterResponse = {
+  data: {
+    models: Array<{
+      slug: string;
+      short_name: string;
+      // this is the actual model object you want
+      endpoint?: {
+        model: {
+          slug: string;
+          short_name: string;
+          is_free: boolean;
+          model_variant_slug: string;
+        };
+        // ... other fields
+      };
+      // fallback, some formats have model directly
+      model?: {
+        slug: string;
+        short_name: string;
+      }
+    }>;
+  };
+};
+
+// If you already have the JSON response
+export function mapToOptions(response: OpenRouterResponse): ModelOption[] {
+  return response.data.models.map((card) => {
+    // this handles all 3 shapes: card.endpoint.model, card.model, or card itself
+    const model = card.endpoint?.model ?? card.model ?? card;
+
+    const slug = model.slug.endsWith(':free') ? model.slug : `${model.slug}:free`;
+
+    return {
+      id: slug as ModelOption['id'], // -> `${data.model.slug}:free`
+      label: model.short_name,        // -> data.model.short_name
+    };
+  });
+}
+
+export async function getFreeModels(): Promise<ModelOption[]> {
+  const res = await fetch(
+    'https://openrouter.ai/api/frontend/v1/models/find?active=true&fmt=cards&order=newest&q=free'
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch models: ${res.status} ${res.statusText}`);
+  }
+
+  const json = (await res.json()) as OpenRouterResponse;
+
+  // Deduplicate by id (API can return same model from different providers)
+  const options = mapToOptions(json);
+  return [...new Map(options.map(o => [o.id, o])).values()];
+}
+
 /** A short curated list shown as quick-pick suggestions in Settings. */
 export const SUGGESTED_MODELS: { id: string; label: string }[] = [
   { id: "openai/gpt-5", label: "GPT-5" },
