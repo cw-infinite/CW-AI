@@ -12,7 +12,7 @@ export const ACCENT_PRESETS: AccentColor[] = [
 ];
 
 const DEFAULT_SETTINGS: AppSettings = {
-  connection: { apiKey: "", model: "openai/gpt-5" },
+  connection: { apiKey: "", model: "openrouter/free", maxOutputTokens: 16384 },
   theme: "system",
   accent: ACCENT_PRESETS[0],
 };
@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 interface SettingsState extends AppSettings {
   setApiKey: (apiKey: string) => void;
   setModel: (model: string) => void;
+  setMaxOutputTokens: (tokens: number) => void;
   setTheme: (theme: ThemeMode) => void;
   setAccent: (accent: AccentColor) => void;
 }
@@ -32,6 +33,11 @@ function persist(state: AppSettings) {
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...persisted,
+  connection: { ...DEFAULT_SETTINGS.connection, ...persisted.connection },
+  setMaxOutputTokens: tokens => {
+    const next = { ...get(), connection: { ...get().connection, maxOutputTokens: tokens } };
+    set(next); persist(next);
+  },
 
   setApiKey: (apiKey) => {
     const next = { ...get(), connection: { ...get().connection, apiKey } };

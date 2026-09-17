@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import type { ChatMessage } from "../types";
+import { isOutputLimited } from '../lib/outputLimits';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -58,12 +59,16 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
             <ThinkingDots />
           ) : (
             <div className="prose-chat">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ img: ({ alt }) => <span>[Image: {alt}]</span>, a: ({ href, children }) => <a href={href} target="_blank" rel="noreferrer">{children}</a> }}>{message.content}</ReactMarkdown>
               {message.streaming && <span className="stream-caret" />}
             </div>
           )}
 
-          {message.error && (
+          {message.contextInfo && <details className="text-xs mt-3 opacity-70"><summary>Context used</summary>{message.contextInfo}</details>}
+          {!!message.toolActivity?.length && <details className="text-xs mt-2"><summary>MCP activity ({message.toolActivity.length})</summary>{message.toolActivity.map((item, index) => <p key={`${item.server}-${item.tool}-${index}`}>{item.status}: {item.server} / {item.tool}</p>)}</details>}
+          {!!message.sources?.length && <details className="text-xs mt-2"><summary>Web sources ({message.sources.length})</summary>{message.sources.map(s => <div key={s.url} className="my-2"><a href={s.url} target="_blank" rel="noreferrer" className="underline">{s.title}</a><p>{s.excerpt.slice(0, 250)}…</p></div>)}</details>}
+          {isOutputLimited(message) && <p role="status" className="mt-3 text-sm">Response reached its output limit. Complete files are available under Files. Increase “Maximum response tokens” in Settings or ask for the remaining files, with any unfinished file rewritten in full.</p>}
+          {message.error && !isOutputLimited(message) && (
             <div
               className="mt-2 flex items-center gap-2 rounded-[var(--radius-md)] px-3 py-2 text-[13px]"
               style={{ background: "var(--danger-soft)", color: "var(--danger)" }}

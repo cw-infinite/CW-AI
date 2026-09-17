@@ -18,18 +18,19 @@ const THEME_OPTIONS: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
 ];
 
 export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
-  const { connection, theme, accent, setApiKey, setModel, setTheme, setAccent } = useSettingsStore();
+  const { connection, theme, accent, setApiKey, setModel, setMaxOutputTokens, setTheme, setAccent } = useSettingsStore();
   const clearAllChats = useChatStore((s) => s.clearAllChats);
   const [showKey, setShowKey] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [freeModels, setData] = useState<ModelOption[]>([]);
+  const [modelError, setModelError] = useState('');
 
   useEffect(() => {
     async function fetchData() {
       const models = await getFreeModels();
       setData(models);
     }
-    fetchData();
+    fetchData().catch(() => { setModelError('Could not load model catalog. You can still use the free router.'); setData([{ id: 'openrouter/free', label: 'Free router' }]); });
   }, []);
 
   return (
@@ -103,6 +104,16 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                 </a>
 
                 <Label>Model</Label>
+                <label className="block text-sm mb-3">Maximum response tokens
+                  <select aria-label="Maximum response tokens" value={connection.maxOutputTokens ?? 16384} onChange={e => setMaxOutputTokens(Number(e.target.value))} className="block w-full rounded-md p-2 my-2" style={{ background: 'var(--bg-inset)', color: 'var(--text)' }}>
+                    <option value={0}>Provider default</option>
+                    {[4096, 8192, 16384, 32768, 65536, 131072].map(n => <option key={n} value={n}>{n.toLocaleString()} tokens</option>)}
+                  </select>
+                </label>
+                <p className="text-xs mb-3">Requested ceiling, not a guaranteed response length. Known model limits are applied automatically. The input and output must also fit the model’s context window. Larger responses may take longer.</p>
+                {freeModels.find(m => m.id === connection.model)?.maxCompletionTokens && <p className="text-xs mb-3">Catalog output limit: {freeModels.find(m => m.id === connection.model)!.maxCompletionTokens!.toLocaleString()} tokens.</p>}
+                <p className="text-xs mb-2">Free models only. Provider rate limits still apply.</p>
+                {modelError && <p role="status" className="text-xs mb-2">{modelError}</p>}
                 <input
                   id="modelName"
                   value={connection.model}

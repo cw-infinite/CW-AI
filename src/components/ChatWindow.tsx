@@ -5,6 +5,12 @@ import { MessageList } from "./MessageList";
 import { Composer } from "./Composer";
 import { EmptyState } from "./EmptyState";
 import type { ImageAttachment } from "../types";
+import { useState } from 'react';
+import { WorkspacePanel } from './WorkspacePanel';
+import { ProjectPanel } from './ProjectPanel';
+import { useAuthStore } from '../store/useAuthStore';
+import { McpPanel } from './McpPanel';
+import { useMcpStore } from '../store/useMcpStore';
 
 interface ChatWindowProps {
   sidebarCollapsed: boolean;
@@ -12,6 +18,13 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ sidebarCollapsed, onShowSidebar }: ChatWindowProps) {
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
+  const [mcpOpen, setMcpOpen] = useState(false);
+  const user = useAuthStore(s => s.user);
+  const webEnabled = useChatStore(s => s.webEnabled);
+  const projectMode = useChatStore(s => s.projectMode);
+  const enabledMcp = useMcpStore(s => s.servers.filter(server => server.enabled));
   const chats = useChatStore((s) => s.chats);
   const activeChatId = useChatStore((s) => s.activeChatId);
   const activeStreams = useChatStore((s) => s.activeStreams);
@@ -53,8 +66,17 @@ export function ChatWindow({ sidebarCollapsed, onShowSidebar }: ChatWindowProps)
         </span>
       </div>
 
+      <div className="workspace-toolbar">
+        <button aria-pressed={webEnabled} onClick={() => useChatStore.getState().setWebEnabled(!webEnabled)}>◎ {webEnabled ? 'Web on' : 'Web off'}</button>
+        <button aria-pressed={projectMode} onClick={() => useChatStore.getState().setProjectMode(!projectMode)}>⌘ Build project</button>
+        <button aria-expanded={filesOpen} onClick={() => setFilesOpen(!filesOpen)}>Files</button>
+        <button onClick={() => setMcpOpen(true)}>MCP ({enabledMcp.length})</button>
+        <button className="ml-auto" onClick={() => setAccountOpen(true)}>{user ? 'Account & memory' : 'Sign in / Memory'}</button>
+      </div>
+      {webEnabled && <p className="workspace-hint">Free Wikipedia search, or paste an HTTPS URL to read a public page. Sources are sent to your selected model.</p>}
+      {filesOpen && <ProjectPanel messages={chat?.messages ?? []} />}
       {chat && chat.messages.length > 0 ? (
-        <MessageList messages={chat.messages} onRetry={() => activeChatId && retryLastMessage(activeChatId)} />
+        <MessageList key={chat.id} messages={chat.messages} onRetry={() => activeChatId && retryLastMessage(activeChatId)} />
       ) : (
         <EmptyState onPick={(text) => handleSend(text, [])} />
       )}
@@ -64,6 +86,8 @@ export function ChatWindow({ sidebarCollapsed, onShowSidebar }: ChatWindowProps)
         onSend={handleSend}
         onStop={() => activeChatId && stopGenerating(activeChatId)}
       />
+      {accountOpen && <WorkspacePanel onClose={() => setAccountOpen(false)} />}
+      {mcpOpen && <McpPanel onClose={() => setMcpOpen(false)} />}
     </div>
   );
 }

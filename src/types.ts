@@ -17,6 +17,28 @@ export interface ChatMessage {
   streaming?: boolean;
   /** set if the request failed */
   error?: string;
+  truncated?: boolean;
+  sources?: { title: string; url: string; excerpt: string }[];
+  contextInfo?: string;
+  toolActivity?: { server: string; tool: string; status: 'used' | 'blocked' | 'failed' }[];
+}
+
+export interface McpToolDefinition {
+  name: string;
+  description?: string;
+  inputSchema?: Record<string, unknown>;
+  readOnly?: boolean;
+}
+
+export interface McpServerConfig {
+  id: string;
+  name: string;
+  url: string;
+  enabled: boolean;
+  token?: string;
+  tools: McpToolDefinition[];
+  error?: string;
+  connectedAt?: number;
 }
 
 export interface Chat {
@@ -39,6 +61,7 @@ export interface AccentColor {
 export interface ConnectionSettings {
   apiKey: string;
   model: string;
+  maxOutputTokens?: number;
 }
 
 export interface AppSettings {
