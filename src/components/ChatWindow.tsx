@@ -24,7 +24,7 @@ export function ChatWindow({ sidebarCollapsed, onShowSidebar }: ChatWindowProps)
   const user = useAuthStore(s => s.user);
   const webEnabled = useChatStore(s => s.webEnabled);
   const projectMode = useChatStore(s => s.projectMode);
-  const enabledMcp = useMcpStore(s => s.servers.filter(server => server.enabled));
+  const enabledMcpCount = useMcpStore(s => s.servers.filter(server => server.enabled).length);
   const chats = useChatStore((s) => s.chats);
   const activeChatId = useChatStore((s) => s.activeChatId);
   const activeStreams = useChatStore((s) => s.activeStreams);
@@ -70,7 +70,7 @@ export function ChatWindow({ sidebarCollapsed, onShowSidebar }: ChatWindowProps)
         <button aria-pressed={webEnabled} onClick={() => useChatStore.getState().setWebEnabled(!webEnabled)}>◎ {webEnabled ? 'Web on' : 'Web off'}</button>
         <button aria-pressed={projectMode} onClick={() => useChatStore.getState().setProjectMode(!projectMode)}>⌘ Build project</button>
         <button aria-expanded={filesOpen} onClick={() => setFilesOpen(!filesOpen)}>Files</button>
-        <button onClick={() => setMcpOpen(true)}>MCP ({enabledMcp.length})</button>
+        <button onClick={() => setMcpOpen(true)}>MCP ({enabledMcpCount})</button>
         <button className="ml-auto" onClick={() => setAccountOpen(true)}>{user ? 'Account & memory' : 'Sign in / Memory'}</button>
       </div>
       {webEnabled && <p className="workspace-hint">Free Wikipedia search, or paste an HTTPS URL to read a public page. Sources are sent to your selected model.</p>}

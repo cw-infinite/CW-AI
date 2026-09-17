@@ -13,7 +13,10 @@ interface McpState {
   removeServer: (id: string) => void; toggleServer: (id: string) => void; refreshServer: (id: string) => Promise<void>;
 }
 function valid(config: unknown): config is McpServerConfig { return !!config && typeof config === 'object' && typeof (config as McpServerConfig).id === 'string' && typeof (config as McpServerConfig).name === 'string' && typeof (config as McpServerConfig).url === 'string' && Array.isArray((config as McpServerConfig).tools); }
-function load() { return loadJSON<unknown[]>(`${KEY}${storageOwner()}`, []).filter(valid); }
+function load() {
+  const stored = loadJSON<unknown>(`${KEY}${storageOwner()}`, []);
+  return Array.isArray(stored) ? stored.filter(valid) : [];
+}
 function persist(servers: McpServerConfig[]) { saveJSON(`${KEY}${storageOwner()}`, servers); }
 export const useMcpStore = create<McpState>((set, get) => ({
   servers: load(), busyId: null,

@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints (normally `http://localhost:5173/CW-AI/`). In another terminal, start the optional public-page reader:
+Open the URL Vite prints (normally `http://localhost:5173/`). Keep that terminal running while using the local app. In another terminal, start the optional public-page reader:
 
 ```sh
 npm run server
@@ -103,7 +103,9 @@ Live authenticated Appwrite backup/restore requires the console setup and an app
 
 ## Deployment
 
-The existing `/CW-AI/` base is retained. Static hosting can run chat, Appwrite, downloads and Wikipedia search. Arbitrary page reading additionally needs a Node service behind your site's `/api/read` route; Vite's development proxy is not included in `dist`. Before exposing that service publicly, put it behind authentication and per-user rate limiting at your hosting gateway. Keep it bound to loopback behind the gateway. This change does not deploy a backend or modify your live Appwrite project.
+The build uses relative asset paths, so it works under a GitHub Pages repository subdirectory without hardcoding the repository name. Push changes to `main` to run the existing Pages deployment workflow, and use the deployment URL shown by that workflow. In repository Settings → Pages, select GitHub Actions as the build source.
+
+Static hosting can run chat, Appwrite, downloads and Wikipedia search. Arbitrary page reading additionally needs a Node service behind your site's `/api/read` route; Vite's development proxy is not included in `dist`. Before exposing that service publicly, put it behind authentication and per-user rate limiting at your hosting gateway. Keep it bound to loopback behind the gateway. This change does not deploy a backend or modify your live Appwrite project.
 
 ## Reference documentation
 
