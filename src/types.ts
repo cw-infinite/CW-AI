@@ -42,6 +42,8 @@ export interface McpServerConfig {
 }
 
 export interface Chat {
+  /** Omitted to follow the current model default in Settings. */
+  model?: string;
   id: string;
   title: string;
   messages: ChatMessage[];
@@ -68,6 +70,7 @@ export interface AppSettings {
   connection: ConnectionSettings;
   theme: ThemeMode;
   accent: AccentColor;
+  chatColors: { user: string; assistant: string; userOpacity: number; assistantOpacity: number };
 }
 
 export interface EmbeddingResult {

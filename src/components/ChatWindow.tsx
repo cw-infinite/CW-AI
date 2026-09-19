@@ -11,6 +11,7 @@ import { ProjectPanel } from './ProjectPanel';
 import { useAuthStore } from '../store/useAuthStore';
 import { McpPanel } from './McpPanel';
 import { useMcpStore } from '../store/useMcpStore';
+import { ChatModelSelect } from './ChatModelSelect';
 
 interface ChatWindowProps {
   sidebarCollapsed: boolean;
@@ -58,12 +59,7 @@ export function ChatWindow({ sidebarCollapsed, onShowSidebar }: ChatWindowProps)
           {chat?.title ?? "새 대화"}
         </span>
         <div className="flex-1" />
-        <span
-          className="truncate rounded-full px-2.5 py-1 text-[11.5px]"
-          style={{ background: "var(--bg-inset)", color: "var(--text-tertiary)" }}
-        >
-          {model || "모델 미설정"}
-        </span>
+        <ChatModelSelect chat={chat} defaultModel={model} disabled={isStreaming} />
       </div>
 
       <div className="workspace-toolbar">

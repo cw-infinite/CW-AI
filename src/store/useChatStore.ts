@@ -45,6 +45,7 @@ interface ChatState {
   activeStreams: Record<string, AbortController>;
 
   newChat: () => void;
+  setChatModel: (id: string, model: string) => void;
   selectChat: (id: string) => void;
   deleteChat: (id: string) => void;
   renameChat: (id: string, title: string) => void;
@@ -94,6 +95,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ chats, activeChatId: chat.id });
     persistChats(chats);
     saveJSON(STORAGE_KEYS.activeChatId, chat.id);
+  },
+
+  setChatModel: (id, model) => {
+    if (get().activeStreams[id]) return;
+    const chats = get().chats.map(c => c.id === id ? { ...c, model: model.trim() || undefined, updatedAt: Date.now() } : c);
+    set({ chats });
+    persistChats(chats);
   },
 
   selectChat: (id) => {
@@ -224,6 +232,7 @@ async function runAssistantTurn(
 
   const { connection } = useSettingsStore.getState();
   const chat = get().chats.find((c) => c.id === chatId);
+  const model = chat?.model || connection.model;
   let buffer = '';
   let timer: ReturnType<typeof setTimeout> | undefined;
   const flush = () => { timer = undefined; applyToAssistant(m => ({ ...m, content: buffer })); };
@@ -240,7 +249,7 @@ async function runAssistantTurn(
     if (mcpServers.length) {
       let calls: Awaited<ReturnType<typeof selectMcpToolCalls>> = [];
       try {
-        calls = await selectMcpToolCalls(connection.apiKey, connection.model, context.messages, mcpServers, controller.signal);
+        calls = await selectMcpToolCalls(connection.apiKey, model, context.messages, mcpServers, controller.signal);
       } catch (error) {
         // Some free models do not implement function calling. A normal chat must still work.
         const detail = error instanceof Error ? error.message.slice(0, 300) : 'Unknown error';
@@ -271,7 +280,7 @@ async function runAssistantTurn(
     if (controller.signal.aborted) return;
     await streamChatCompletion({
       apiKey: connection.apiKey,
-      model: connection.model,
+      model,
       maxOutputTokens: connection.maxOutputTokens ?? 16384,
       onOutputLimit: () => applyToAssistant(m => ({ ...m, truncated: true })),
       messages: context.messages,

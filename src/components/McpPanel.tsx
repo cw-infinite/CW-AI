@@ -7,6 +7,7 @@ export function McpPanel({ onClose }: { onClose: () => void }) {
   return <div className="workspace-backdrop" onClick={onClose}><section role="dialog" aria-modal="true" aria-label="MCP servers" className="workspace-panel" onClick={e => e.stopPropagation()}>
     <div className="flex items-center justify-between"><h2>MCP servers</h2><button onClick={onClose} aria-label="Close MCP servers">✕</button></div>
     <p>Connect remote Streamable HTTP MCP servers. Enabled servers make their discovered tools available in chat.</p>
+    <p className="text-xs">Tavily: use https://mcp.tavily.com/mcp/ and paste your API key in the bearer-token field. Pasted Tavily key URLs are also accepted. Tavily works through the local development server; GitHub Pages requires a hosted backend relay.</p>
     <form onSubmit={e => { e.preventDefault(); setError(''); void addServer({ name, url, token: token || undefined, enabled: true }).then(() => { setName(''); setUrl(''); setToken(''); }).catch(err => setError(err instanceof Error ? err.message : 'Could not connect.')); }}>
       <label>Name<input required value={name} onChange={e => setName(e.target.value)} placeholder="Example: My notes" /></label>
       <label>HTTPS MCP endpoint<input type="url" required value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com/mcp" /></label>

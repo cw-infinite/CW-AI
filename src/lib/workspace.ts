@@ -28,12 +28,14 @@ export function validateWorkspace(value: unknown): Workspace {
   if (!w || !Array.isArray(w.chats) || (w.memoryEnabled !== undefined && typeof w.memoryEnabled !== 'boolean') ||
     (w.forgottenMemoryIds !== undefined && (!Array.isArray(w.forgottenMemoryIds) || !w.forgottenMemoryIds.every(id => typeof id === 'string' && id.length <= 600))) ||
     !w.chats.every(c => c && typeof c.id === 'string' && typeof c.title === 'string' && Number.isFinite(c.createdAt) && Number.isFinite(c.updatedAt) &&
+      (c.model === undefined || (typeof c.model === 'string' && c.model.length <= 200)) &&
       Array.isArray(c.messages) && c.messages.every(validMessage))) {
     throw new Error('Invalid workspace file.');
   }
   if (new Set(w.chats.map(c => c.id)).size !== w.chats.length) throw new Error('Duplicate chat IDs.');
   return { memoryEnabled: w.memoryEnabled ?? true, forgottenMemoryIds: w.forgottenMemoryIds ?? [], chats: w.chats.map(c => ({
     id: c.id, title: c.title, createdAt: c.createdAt, updatedAt: c.updatedAt,
+    model: c.model || undefined,
     messages: c.messages.map(m => ({ ...m, streaming: false, sources: Array.isArray(m.sources) ? m.sources.filter(s =>
       s && typeof s.title === 'string' && typeof s.excerpt === 'string' && typeof s.url === 'string' && /^https?:\/\//.test(s.url)) : undefined })),
   })) };

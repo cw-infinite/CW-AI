@@ -18,7 +18,7 @@ const THEME_OPTIONS: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
 ];
 
 export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
-  const { connection, theme, accent, setApiKey, setModel, setMaxOutputTokens, setTheme, setAccent } = useSettingsStore();
+  const { connection, theme, accent, chatColors, setChatColors, setApiKey, setModel, setMaxOutputTokens, setTheme, setAccent } = useSettingsStore();
   const clearAllChats = useChatStore((s) => s.clearAllChats);
   const [showKey, setShowKey] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -103,7 +103,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                   <ExternalLink size={11} />
                 </a>
 
-                <Label>Model</Label>
+                <Label>Default model</Label>
+                <p className="text-xs mb-3">Used by chats without their own model selection. Choose a different model in a chat’s header to override this default.</p>
                 <label className="block text-sm mb-3">Maximum response tokens
                   <select aria-label="Maximum response tokens" value={connection.maxOutputTokens ?? 16384} onChange={e => setMaxOutputTokens(Number(e.target.value))} className="block w-full rounded-md p-2 my-2" style={{ background: 'var(--bg-inset)', color: 'var(--text)' }}>
                     <option value={0}>Provider default</option>
@@ -176,6 +177,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                       key={preset.name}
                       onClick={() => setAccent(preset)}
                       title={preset.name}
+                      aria-label={`Accent: ${preset.name}`}
+                      aria-pressed={accent.name === preset.name}
                       className="grid h-8 w-8 place-items-center rounded-full transition-transform hover:scale-110"
                       style={{
                         background: `hsl(${preset.h} ${preset.s}% 55%)`,
@@ -207,6 +210,27 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                     }}
                   />
                 </div>
+              </section>
+
+              <section className="mb-8">
+                <SectionTitle>Chat backgrounds</SectionTitle>
+                <p className="mb-4 text-xs" style={{ color: 'var(--text-secondary)' }}>Choose separate colors for your messages and AI responses. Opacity controls the background only; 0% is fully transparent.</p>
+                {(['user', 'assistant'] as const).map(role => {
+                  const label = role === 'user' ? 'Your messages' : 'AI responses';
+                  const opacityKey = role === 'user' ? 'userOpacity' : 'assistantOpacity';
+                  return <div key={role} className="mb-5">
+                    <h4 className="mb-2 text-sm">{label}</h4>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {['#6366f1', '#8b5cf6', '#3b82f6', '#06b6d4', '#14b8a6', '#22c55e', '#84cc16', '#eab308', '#f97316', '#f43f5e', '#ec4899', '#64748b'].map(color => <button key={color} type="button" aria-label={`${label}: ${color}`} aria-pressed={chatColors[role] === color} onClick={() => setChatColors({ [role]: color })} className="h-7 w-7 rounded-full" style={{ background: color, outline: chatColors[role] === color ? '2px solid var(--text)' : 'none', outlineOffset: 2 }} />)}
+                    </div>
+                    <label className="flex items-center justify-between text-xs mb-3">Custom color<input aria-label={`${label} custom color`} type="color" value={chatColors[role]} onChange={e => setChatColors({ [role]: e.target.value })} /></label>
+                    <label className="block text-xs">Background opacity: {chatColors[opacityKey]}%
+                      <input aria-label={`${label} background opacity`} className="block w-full my-2" type="range" min={0} max={100} value={chatColors[opacityKey]} onChange={e => setChatColors({ [opacityKey]: Number(e.target.value) })} />
+                    </label>
+                    <button type="button" className="text-xs underline mb-3" onClick={() => setChatColors({ [opacityKey]: 0 })}>Make {label.toLowerCase()} transparent</button>
+                    <div className="rounded-lg p-3 text-sm" style={{ background: `${chatColors[role]}${Math.round(chatColors[opacityKey] * 2.55).toString(16).padStart(2, '0')}`, color: 'var(--text)' }}>Preview: {role === 'user' ? 'Can you help me build a project?' : 'Of course! Let’s start with your idea.'}</div>
+                  </div>;
+                })}
               </section>
 
               {/* Data */}

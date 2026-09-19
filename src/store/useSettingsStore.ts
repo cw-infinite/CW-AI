@@ -9,12 +9,19 @@ export const ACCENT_PRESETS: AccentColor[] = [
   { name: "틸", h: 172, s: 55 },
   { name: "로즈", h: 342, s: 70 },
   { name: "앰버", h: 32, s: 90 },
+  { name: "Emerald", h: 152, s: 65 },
+  { name: "Cyan", h: 190, s: 80 },
+  { name: "Pink", h: 320, s: 75 },
+  { name: "Coral", h: 12, s: 80 },
+  { name: "Lime", h: 85, s: 65 },
+  { name: "Slate", h: 215, s: 15 },
 ];
 
 const DEFAULT_SETTINGS: AppSettings = {
   connection: { apiKey: "", model: "openrouter/free", maxOutputTokens: 16384 },
   theme: "system",
   accent: ACCENT_PRESETS[0],
+  chatColors: { user: '#6366f1', assistant: '#14b8a6', userOpacity: 15, assistantOpacity: 0 },
 };
 
 interface SettingsState extends AppSettings {
@@ -23,6 +30,7 @@ interface SettingsState extends AppSettings {
   setMaxOutputTokens: (tokens: number) => void;
   setTheme: (theme: ThemeMode) => void;
   setAccent: (accent: AccentColor) => void;
+  setChatColors: (colors: Partial<AppSettings['chatColors']>) => void;
 }
 
 const persisted = loadJSON<AppSettings>(STORAGE_KEYS.settings, DEFAULT_SETTINGS);
@@ -33,6 +41,11 @@ function persist(state: AppSettings) {
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...persisted,
+  chatColors: { ...DEFAULT_SETTINGS.chatColors, ...persisted.chatColors },
+  setChatColors: colors => {
+    const next = { ...get(), chatColors: { ...get().chatColors, ...colors } };
+    set(next); persist(next);
+  },
   connection: { ...DEFAULT_SETTINGS.connection, ...persisted.connection },
   setMaxOutputTokens: tokens => {
     const next = { ...get(), connection: { ...get().connection, maxOutputTokens: tokens } };

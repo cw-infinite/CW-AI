@@ -103,6 +103,12 @@ Live authenticated Appwrite backup/restore requires the console setup and an app
 
 ## Deployment
 
+### Tavily MCP in local development
+
+In MCP, add `https://mcp.tavily.com/mcp/` and put your Tavily API key in the bearer-token field. Pasting the Tavily URL containing `tavilyApiKey` also works: the app moves the key into the token field. Restart `npm run dev` after updating the project. Vite forwards Tavily requests through a fixed upstream relay, avoiding Tavily's unsupported browser CORS preflight. No second local server is required for this relay. Other MCP endpoints still connect directly.
+
+The Tavily relay is development-only. GitHub Pages cannot run it; a hosted backend relay must be implemented and deployed before Tavily works on the published site. The app explains this requirement instead of showing a generic fetch error. Tavily usage is billed/limited by your Tavily account, separately from OpenRouter.
+
 The build uses relative asset paths, so it works under a GitHub Pages repository subdirectory without hardcoding the repository name. Push changes to `main` to run the existing Pages deployment workflow, and use the deployment URL shown by that workflow. In repository Settings → Pages, select GitHub Actions as the build source.
 
 Static hosting can run chat, Appwrite, downloads and Wikipedia search. Arbitrary page reading additionally needs a Node service behind your site's `/api/read` route; Vite's development proxy is not included in `dist`. Before exposing that service publicly, put it behind authentication and per-user rate limiting at your hosting gateway. Keep it bound to loopback behind the gateway. This change does not deploy a backend or modify your live Appwrite project.
